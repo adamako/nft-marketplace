@@ -39,7 +39,19 @@ describe("KBMarket", function () {
       .connect(buyerAddress)
       .createMarketSale(nftContractAddress, 1, { value: auctionPrice });
 
-    const items = await market.fetchMarketTokens();
+    let items = await market.fetchMarketTokens();
+    items = await Promise.all(
+      items.map(async (i) => {
+        const tokenUri = await nft.tokenURI(i.tokenId);
+        return {
+          price: i.price.toString(),
+          tokenId: i.tokenId.toString(),
+          seller: i.seller,
+          owner: i.owner,
+          tokenUri,
+        };
+      })
+    );
 
     console.log("items", items);
   });
