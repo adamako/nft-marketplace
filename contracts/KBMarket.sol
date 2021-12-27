@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
@@ -37,16 +38,16 @@ contract KBMarket is ReentrancyGuard {
     // tokenId return which MarketToken - fetch which one it is
     mapping(uint256 => MarketToken) private idToMarketToken;
 
-    //listen to events from frontend applications
+    //Listen to events from frontend applications
     event MarketTokenMinted(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, address seller, address owner, uint256 price, bool sold);
 
-    //get the listing price
-    function getListingPrice() public returns (uint256){
+    //Get the listing price
+    function getListingPrice() public view returns (uint256){
         return listingPrice;
     }
 
-    // create a market item to put it up for sale
-    function mintMarketItem(address nftContract, uint tokenId, uint price) public payable nonReentrant {
+    // Create a market item to put it up for sale
+    function makeMarketItem(address nftContract, uint tokenId, uint price) public payable nonReentrant {
         require(price > 0, "Price must be at least one wei");
         require(msg.value == listingPrice, "Price must be equal to listing price");
         _tokenIds.increment();
@@ -67,15 +68,15 @@ contract KBMarket is ReentrancyGuard {
         uint price = idToMarketToken[itemId].price;
         uint tokenId = idToMarketToken[itemId].tokenId;
         require(msg.value == price, "Please submit the asking price in order to continue");
-        // transfert the amount to the seller
+        // Transfer the amount to the seller
         idToMarketToken[itemId].seller.transfer(msg.value);
-        // transfert the token from contract address to the buyer
+        // Transfer the token from contract address to the buyer
         IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
-        idToMarketToken[itemId].owner = address payable(msg.sender);
+        idToMarketToken[itemId].owner = payable(msg.sender);
         idToMarketToken[itemId].sold = true;
         _tokensSold.increment();
 
-        address payable(owner).transfert(listingPrice);
+        payable(owner).transfer(listingPrice);
     }
 
     //fetchMarketItems, minting, buying and selling. Return the number of unsold items

@@ -1,10 +1,13 @@
 require("@nomiclabs/hardhat-waffle");
 const projectId = "3de6c70add3f45d7b1e17727d4ce6968";
-const fs= require('fs')
-const keyData= fs.readFileSync('./p-key.txt',{
-  encoding:'utf-8', flag:'r'
-})
-
+const fs = require("fs");
+const keyData = fs
+  .readFileSync("./p-key.txt", {
+    encoding: "utf-8",
+    flag: "r",
+  })
+  .toString()
+  .trim();
 
 module.exports = {
   defaultNetwork: "hardhat",
