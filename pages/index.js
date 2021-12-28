@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
+import Web3Modal from "web3modal";
 import KBMarket from "../artifacts/contracts/KBMarket.sol/KBMarket.json";
 import NFT from "../artifacts/contracts/NFT.sol/NFT.json";
 import { nftContractAddress, nftMarketAddress } from "../config";
@@ -52,5 +53,33 @@ export default function Home() {
     setLoadingState("Loaded");
   };
 
+  //Buy nft
+  const buyNFT = async (nft) => {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(
+      nftMarketAddress,
+      KBMarket.abi,
+      signer
+    );
+
+    const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
+    const transaction = await contract.createMarketSale(
+      nftContractAddress,
+      nft.tokenId,
+      {
+        value: price,
+      }
+    );
+
+    await transaction.wait();
+
+    await loadNfts();
+  };
+
+  if (loadingState === "Loaded" && !nfts.length)
+    return <h1 className={"px-20 py-7 text-4x1"}>No NFTs in marketplace</h1>;
   return <div></div>;
 }
