@@ -1,25 +1,25 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
+const fs = require("fs");
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
-
   // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const NFTMarket = await hre.ethers.getContractFactory("KBMarket");
+  const nftMarket = await NFTMarket.deploy();
+  await nftMarket.deployed();
+  console.log("NFTMarket deployed to:", nftMarket.address);
 
-  await greeter.deployed();
+  const NFT = await hre.ethers.getContractFactory("NFT");
+  const nft = await NFT.deploy(nftMarket.address);
+  await nft.deployed();
+  console.log("NFT contract deployed to:", nft.address);
 
-  console.log("Greeter deployed to:", greeter.address);
+  // Export data
+  let config = `
+  export const nftMarketAddress='${nftMarket.address}'
+  export const nftContractAddress = '${nft.address}'`;
+
+  let data = JSON.stringify(config);
+  fs.writeFileSync("config.js", JSON.parse(data));
 }
 
 // We recommend this pattern to be able to use async/await everywhere
